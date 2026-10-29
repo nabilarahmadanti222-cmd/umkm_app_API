@@ -1,0 +1,27 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE umkm (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    nama VARCHAR(150) NOT NULL,
+    deskripsi TEXT,
+    alamat VARCHAR(255),
+    foto VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE produk (
+    id SERIAL PRIMARY KEY,
+    umkm_id INTEGER NOT NULL REFERENCES umkm(id) ON DELETE CASCADE,
+    nama VARCHAR(150) NOT NULL,
+    harga NUMERIC(12,2) NOT NULL DEFAULT 0,
+    deskripsi TEXT,
+    foto VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

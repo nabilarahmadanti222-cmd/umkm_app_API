@@ -1,0 +1,625 @@
+basePath: /api
+definitions:
+  domain.Produk:
+    properties:
+      deskripsi:
+        type: string
+      foto:
+        type: string
+      harga:
+        type: number
+      id:
+        type: integer
+      nama:
+        type: string
+      umkm_id:
+        type: integer
+    type: object
+  domain.Umkm:
+    properties:
+      alamat:
+        type: string
+      deskripsi:
+        type: string
+      foto:
+        type: string
+      id:
+        type: integer
+      nama:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      nama:
+        type: string
+    type: object
+  handler.DataLoginResponse:
+    properties:
+      data:
+        properties:
+          token:
+            type: string
+          user:
+            $ref: '#/definitions/domain.User'
+        type: object
+    type: object
+  handler.DataProdukListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/domain.Produk'
+        type: array
+    type: object
+  handler.DataProdukResponse:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Produk'
+    type: object
+  handler.DataUmkmListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/domain.Umkm'
+        type: array
+    type: object
+  handler.DataUmkmResponse:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Umkm'
+    type: object
+  handler.DataUserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/domain.User'
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+        type: object
+    type: object
+  handler.MessageResponse:
+    properties:
+      data:
+        properties:
+          message:
+            type: string
+        type: object
+    type: object
+  handler.loginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.registerRequest:
+    properties:
+      email:
+        type: string
+      nama:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.updatePasswordRequest:
+    properties:
+      password_baru:
+        type: string
+      password_lama:
+        type: string
+    type: object
+  handler.updateProfileRequest:
+    properties:
+      email:
+        type: string
+      nama:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: 'REST API untuk pendataan UMKM: registrasi, login, kelola profil, kelola
+    UMKM milik sendiri, dan kelola produk.'
+  title: UMKM API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login dengan email dan password, mengembalikan JWT token
+      parameters:
+      - description: Kredensial login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataLoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Mendaftarkan pengguna baru dengan nama, email, dan password
+      parameters:
+      - description: Data registrasi
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.DataUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Register akun baru
+      tags:
+      - auth
+  /produk/{id}:
+    delete:
+      parameters:
+      - description: ID Produk
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MessageResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Hapus produk sendiri
+      tags:
+      - produk
+    get:
+      parameters:
+      - description: ID Produk
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataProdukResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Detail produk
+      tags:
+      - produk
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: ID Produk
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nama produk
+        in: formData
+        name: nama
+        required: true
+        type: string
+      - description: Harga produk
+        in: formData
+        name: harga
+        required: true
+        type: number
+      - description: Deskripsi produk
+        in: formData
+        name: deskripsi
+        type: string
+      - description: Foto produk baru
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataProdukResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update produk sendiri
+      tags:
+      - produk
+  /profile:
+    get:
+      description: Mengambil data profil pengguna yang sedang login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataUserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Lihat profil sendiri
+      tags:
+      - profile
+    put:
+      consumes:
+      - application/json
+      description: Mengubah nama dan email akun yang sedang login
+      parameters:
+      - description: Data profil baru
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update profil
+      tags:
+      - profile
+  /profile/password:
+    put:
+      consumes:
+      - application/json
+      description: Mengubah password akun yang sedang login, wajib menyertakan password
+        lama
+      parameters:
+      - description: Password lama dan baru
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update password
+      tags:
+      - profile
+  /umkm:
+    get:
+      description: Mendukung pagination dan pencarian nama
+      parameters:
+      - description: Kata kunci pencarian nama UMKM
+        in: query
+        name: q
+        type: string
+      - description: Halaman (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Jumlah data per halaman (default 10, maksimal 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataUmkmListResponse'
+      summary: Lihat semua UMKM
+      tags:
+      - umkm
+    post:
+      consumes:
+      - multipart/form-data
+      description: 1 user hanya boleh punya 1 UMKM. Foto opsional.
+      parameters:
+      - description: Nama UMKM
+        in: formData
+        name: nama
+        required: true
+        type: string
+      - description: Deskripsi UMKM
+        in: formData
+        name: deskripsi
+        type: string
+      - description: Alamat UMKM
+        in: formData
+        name: alamat
+        type: string
+      - description: Foto UMKM
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.DataUmkmResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Buat UMKM sendiri
+      tags:
+      - umkm
+  /umkm/{id}:
+    delete:
+      description: Produk pada UMKM ini ikut terhapus otomatis (ON DELETE CASCADE)
+      parameters:
+      - description: ID UMKM
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.MessageResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Hapus UMKM sendiri
+      tags:
+      - umkm
+    get:
+      parameters:
+      - description: ID UMKM
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataUmkmResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Detail UMKM
+      tags:
+      - umkm
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: ID UMKM
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nama UMKM
+        in: formData
+        name: nama
+        required: true
+        type: string
+      - description: Deskripsi UMKM
+        in: formData
+        name: deskripsi
+        type: string
+      - description: Alamat UMKM
+        in: formData
+        name: alamat
+        type: string
+      - description: Foto UMKM baru
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataUmkmResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update UMKM sendiri
+      tags:
+      - umkm
+  /umkm/{id}/produk:
+    get:
+      description: Mendukung pagination
+      parameters:
+      - description: ID UMKM
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Halaman (default 1)
+        in: query
+        name: page
+        type: integer
+      - description: Jumlah data per halaman (default 10, maksimal 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataProdukListResponse'
+      summary: Lihat produk pada satu UMKM
+      tags:
+      - produk
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: ID UMKM
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nama produk
+        in: formData
+        name: nama
+        required: true
+        type: string
+      - description: Harga produk
+        in: formData
+        name: harga
+        required: true
+        type: number
+      - description: Deskripsi produk
+        in: formData
+        name: deskripsi
+        type: string
+      - description: Foto produk
+        in: formData
+        name: foto
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.DataProdukResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Tambah produk pada UMKM sendiri
+      tags:
+      - produk
+  /umkm/saya:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DataUmkmResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Lihat UMKM saya
+      tags:
+      - umkm
+securityDefinitions:
+  BearerAuth:
+    description: 'Ketik "Bearer" diikuti spasi dan token JWT. Contoh: "Bearer eyJhbGciOi..."'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
